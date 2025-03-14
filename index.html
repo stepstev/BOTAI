@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant IA Professionnel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="logo-container">
+                <img src="./images/groq-logo.svg" alt="Groq" class="tech-logo">
+                <img src="./images/vscode.svg" alt="VSCode" class="tech-logo">
+            </div>
+            <div class="title-container">
+                <h1>Assistant IA Professionnel</h1>
+                <span class="signature">© By Stéphane CELTON • 2025</span>
+            </div>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Posez votre question...">
+            <button onclick="sendMessage()">Envoyer</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script>
+        const API_KEY = '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';
+        // Correction de l'URL de l'API
+        const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+        async function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, 'user-message');
+            userInput.value = '';
+            const loadingDiv = addLoadingIndicator();
+
+            try {
+                console.log('Envoi de la requête à Groq...');
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`,
+                        'Accept': 'application/json',
+                        'Cache-Control': 'no-cache'
+                    },
+                    body: JSON.stringify({
+                        model: "mixtral-8x7b-32768", // Changement du modèle
+                        messages: [{
+                            role: "system",
+                            content: "Assistant IA spécialisé en programmation. Réponses claires avec exemples de code."
+                        }, {
+                            role: "user",
+                            content: message
+                        }],
+                        temperature: 0.3,
+                        max_tokens: 4096,
+                        stream: false // Désactivation du streaming pour plus de stabilité
+                    })
+                });
+
+                console.log('Status de la réponse:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Réponse API:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        errorDetails: errorText
+                    });
+                    throw new Error(`Erreur API (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('Réponse reçue:', data);
+
+                if (!data.choices?.[0]?.message?.content) {
+                    throw new Error('Format de réponse invalide');
+                }
+
+                const botResponse = data.choices[0].message.content;
+                loadingDiv.remove();
+                addMessage(botResponse, 'bot-message');
+
+            } catch (error) {
+                console.error('Erreur complète:', error);
+                loadingDiv.remove();
+                addMessage(`Une erreur est survenue: ${error.message}`, 'error-message');
+            }
+        }
+
+        function addLoadingIndicator() {
+            const div = document.createElement('div');
+            div.className = 'loading-message';
+            div.textContent = 'En cours de traitement...';
+            document.getElementById('chat-messages').appendChild(div);
+            return div;
+        }
+
+        function addMessage(text, className) {
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${className}`;
+
+            // Formatage du code avec Prism.js
+            if (text.includes('```')) {
+                text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => 
+                    `<pre><code class="language-${lang || 'plaintext'}">${code.trim()}</code></pre>`
+                );
+            }
+
+            messageDiv.innerHTML = text;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            if (window.Prism) {
+                Prism.highlightAllUnder(messageDiv);
+            }
+        }
+
+        // Envoi avec Entrée
+        document.getElementById('user-input').addEventListener('keypress', e => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
