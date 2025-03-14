@@ -120,7 +120,7 @@ Pour toute question, consultez la documentation de Groq ou ouvrez une issue.
 
 ## Auteur
 
-Ce projet a été développé dans le cadre de la formation UDEMY "DeepSeek le guide complet 2025 Agents IA".
+Ce projet a été développé dans le cadre de la formation UDEMY "DeepSeek 2025 / Agents IA".
 
 ## Licence
 
