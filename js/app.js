@@ -80,7 +80,10 @@ async function generateResponse(input) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json', 
-                'Authorization': 'Bearer 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'
+                //'Authorization': 'Bearer gsk_xxxxxxxxxxxxxxxxx'
+
+
+
             },
             body: JSON.stringify(
                 { 
@@ -111,7 +114,7 @@ async function generateResponse(input) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json', 
-                        'Authorization': 'Bearer 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'
+                        'Authorization': 'Bearer gsk_xxxxxxxxxxxxx'
                     },
                     body: JSON.stringify(
                         { 
